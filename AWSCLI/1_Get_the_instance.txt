@@ -1,0 +1,22 @@
+[root@ehlsiege01 .aws]# aws  ec2 describe-instances --region us-east-1  --profile wte --output table --query 'Reservations[].Instances[].[Tags[?Key==`Name`] |[0].Value,State.Name,InstanceId,PrivateIpAddress,PublicIpAddress]'
+-------------------------------------------------------------------------------------------------------------------
+|                                                DescribeInstances                                                |
++---------------------------------------+-------------+----------------------+-----------------+------------------+
+|  wtedevwsvc01                         |  running    |  i-025a052b30960f4a9 |  172.28.50.200  |  34.202.82.248   |
+|  dbc-7c0fb459-74fc-worker             |  running    |  i-0afa8a7a2a530ca88 |  10.183.254.71  |  34.201.218.10   |
+|  wtelweb04                            |  stopped    |  i-029fbeb05b31baf71 |  172.28.20.117  |  None            |
+|  wtestgwweb02                         |  running    |  i-0cc3632737e52d33a |  172.28.23.170  |  34.225.124.109  |
+|  dbc-7c0fb459-74fc-worker             |  running    |  i-07a0fba09ee683565 |  10.183.253.130 |  34.207.173.156  |
+
+
+;;;   Just ADD the required Values Like "PublicDnsName"  if needed
+
+[root@ehlsiege01 .aws]# aws  ec2 describe-instances --region us-east-1  --profile wte --output table --query 'Reservations[].Instances[].[Tags[?Key==`Name`] |[0].Value,State.Name,InstanceId,PublicDnsName,PrivateIpAddress,PublicIpAddress]'
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+|                                                                       DescribeInstances                                                                       |
++---------------------------------------+-------------+----------------------+----------------------------------------------+-----------------+-----------------+
+|  wtedevwsvc01                         |  running    |  i-025a052b30960f4a9 |  ec2-34-202-82-248.compute-1.amazonaws.com   |  172.28.50.200  |  34.202.82.248  |
+|  dbc-7c0fb459-74fc-worker             |  running    |  i-0afa8a7a2a530ca88 |  ec2-34-201-218-10.compute-1.amazonaws.com   |  10.183.254.71  |  34.201.218.10  |
+|  wtelweb04                            |  stopped    |  i-029fbeb05b31baf71 |                                              |  172.28.20.117  |  None           |
+|  wtestgwweb02                         |  running    |  i-0cc3632737e52d33a |  ec2-34-225-124-109.compute-1.amazonaws.com  |  172.28.23.170  |  34.225.124.109 |
+

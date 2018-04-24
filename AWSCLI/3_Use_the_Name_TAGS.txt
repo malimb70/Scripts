@@ -1,0 +1,25 @@
+	How Put the Name Tags in OUTPUT
+	==============================
+
+[root@ehlsiege01 .aws]# aws  ec2 describe-instances --region us-east-1  --profile mpt --output table --filters "Name=tag:env,Values=prod" --filters "Name=instance-state-name,Values=running" --query 'Reservations[].Instances[].[Tags[?Key==`Name`] |  [0].Value,PublicDnsName,State.Name]'
+------------------------------------------------------------------------------------------------------------------------
+|                                                   DescribeInstances                                                  |
++------------------------------------------------------------+----------------------------------------------+----------+
+|  HECWPRSVC01                                               |                                              |  running |
+|  HECWLUCENE01                                              |                                              |  running |
+|  mptlvac01                                                 |  ec2-52-23-177-175.compute-1.amazonaws.com   |  running |
+|  mptqa2lweb01                                              |  ec2-107-22-35-135.compute-1.amazonaws.com   |  running |
+
+ANOTHER EXAMPLE 
+===============
+
+[root@ehlsiege01 .aws]# aws  ec2 describe-instances --region us-east-1  --profile mpt --output table --filters "Name=tag:env,Values=prod" --filters "Name=instance-state-name,Values=running" --query 'Reservations[].Instances[].[Tags[?Key==`Name`] |  [0].Value,PublicDnsName,State.Name]'
+------------------------------------------------------------------------------------------------------------------------
+|                                                   DescribeInstances                                                  |
++------------------------------------------------------------+----------------------------------------------+----------+
+|  HECWPRSVC01                                               |                                              |  running |
+|  HECWLUCENE01                                              |                                              |  running |
+|  hecqalsolrslv02                                           |                                              |  running |
+|  mptqa2lweb01                                              |  ec2-107-22-35-135.compute-1.amazonaws.com   |  running |
+|  HECWTAB01                                                 |                                              |  running |
+|  None                                                      |                                              |  running |
