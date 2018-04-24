@@ -1,0 +1,19 @@
+#!/bin/bash
+
+MUSER="reporter"
+MPASS="r3p0rt3r"
+MHOST="localhost"
+MYSQL="$(which mysql)"
+MYSQLDB="seoreports"
+
+statusdate=$1
+product=$2
+webserver=$3
+status200=$4
+status300=$5
+status400=$6
+status500=$7
+statustotal=$8
+
+$MYSQL -u$MUSER -p$MPASS -h$MHOST $MYSQLDB -e "INSERT INTO googlenewsbotstatus(statusdate, product, webserver, 200status, 300status, 400status, 500status, totalstatus) VALUES ('$statusdate', '$product', '$webserver', '$status200', '$status300', '$status400', '$status500', '$statustotal')"
+

@@ -1,0 +1,12 @@
+{
+    "DryRun": true, 
+    "Resources": [
+        ""
+    ], 
+    "Tags": [
+        {
+            "Key": "", 
+            "Value": ""
+        }
+    ]
+}

@@ -1,0 +1,221 @@
+#!/bin/bash
+#The purpose of this script is to automate retrevial, extraction, Googlebot analysis and importing of records into mysql
+
+#Change to roots home just in case
+cd /home/WATERFRONTMEDIA/kgrefski
+
+#Set Date of Script Run
+logdate=$(date +%m-%d-%Y)
+
+#Create Logname
+logdate=$(date +%m-%d-%Y)
+statusdate=$(date +%Y\/%m\/%d)
+lognameprefix="ex"
+lognamesuffix="log"
+logname=$(date +%y%m%d)
+
+#logname="110129"
+#statusdate="11/01/29"
+#logdate="01/29/2011"
+
+#Setup Email Subjects
+Main_Subject="Google EH WTE MCC Daily Report for $logdate"
+Status_Subject="Status Report for Googlebot script $logdate"
+
+#Setup Email recipients
+Main_EMAIL="kgrefski@waterfrontmedia.com,joelcohen@everydayhealthinc.com,schan@waterfrontmedia.com"
+Status_EMAIL="kgrefski@waterfrontmedia.com,joelcohen@waterfrontmedia.com,schan@waterfrontmedia.com"
+
+#Setup Email messages
+Main_EMAILMESSAGE="/tmp/mainemailmessage.txt"
+Status_EMAILMESSAGE="/tmp/statusemailmessage.txt"
+
+#Create Subject Line
+echo "Googlebot Results for $logdate" > $Main_EMAILMESSAGE
+echo "Googlebot Script output for $logdate" > $Status_EMAILMESSAGE
+
+#Setup Locations and servers
+wteservers=( usnjwweb08 usnjwweb15 usnjwweb38 usnjwweb39 usnjwweb42 )
+wtemount="iislogs/wte/"
+wtereport="/reports/wte/"
+
+ehservers=( usnjwweb11 usnjwweb12 usnjwweb30 usnjwweb31 usnjwweb34 )
+ehmount="iislogs/eh/"
+ehreport="/reports/eh/"
+
+mccservers=( web120 web121 )
+mccmount="iislogs/mcc/"
+mccreport="/reports/mcc/"
+
+svcservers=( svc01 svc02 )
+svcmount="iislogs/services/"
+svcreport="/reports/services/"
+
+#Mount IIS Server Web Directories copy files and unmount 
+
+for web in ${svcservers[@]}
+do
+	# Don't care about google stuff for these logs, just copy them over
+        mount -t cifs -o username=wf_admin,password=Password12 //usnj${web}/svc_wfm $svcmount${web}
+        echo cat ${svcmount}${web}/${lognameprefix}${logname}*.${lognamesuffix} >> ${svcreport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+        cat $svcmount${web}/${lognameprefix}${logname}*.${lognamesuffix} >> ${svcreport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+        umount ${svcmount}${web}
+
+done
+
+for web in ${wteservers[@]}
+do
+	mount -t cifs -o username=wf_admin,password=Password12 //usnjw${web}/wte $wtemount${web}
+	echo cp ${wtemount}${web}/${lognameprefix}${logname}.${lognamesuffix} ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+	cp $wtemount${web}/${lognameprefix}${logname}.${lognamesuffix} ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+	umount ${wtemount}${web}
+	echo "Starting googlebot grep"
+	echo "${web} Serving WhatToExpect on $logdate" >> $Main_EMAILMESSAGE
+	status200=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "20. 0 ." | grep Googlebot | wc -l`  
+	status300=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "30. 0 ." | grep Googlebot | wc -l`
+	status400=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "40. 0 ." | grep Googlebot | wc -l`
+	status500=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "50. 0 ." | grep Googlebot | wc -l`
+	statusTotal=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep Googlebot | wc -l`
+	echo "200 Status	$status200" >> $Main_EMAILMESSAGE
+	echo "300 Status	$status300" >> $Main_EMAILMESSAGE
+	echo "400 Status        $status400" >> $Main_EMAILMESSAGE
+	echo "500 Status        $status500" >> $Main_EMAILMESSAGE
+	echo "Total Googlebot	$statusTotal" >> $Main_EMAILMESSAGE
+	echo "Starting mysql"
+	myproduct="WhatToExpect"
+	/home/WATERFRONTMEDIA/kgrefski/scripts/seo-googlebot-mysql $statusdate $myproduct ${web} $status200 $status300 $status400 $status500 $statusTotal
+	cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep Googlebot >${wtereport}${web}/${web}"Googlebot"${logname}.${lognamesuffix}
+
+	echo "Starting googleadbot grep"
+	statusAD200=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "20. 0 ." | grep -i adsbot-google | wc -l`
+	statusAD300=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "30. 0 ." | grep -i adsbot-google | wc -l`
+	statusAD400=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "40. 0 ." | grep -i adsbot-google | wc -l`
+	statusAD500=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "50. 0 ." | grep -i adsbot-google | wc -l`
+	statusADTotal=`cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep -i adsbot-google | wc -l`
+	echo "200 Status	$statusAD200" >> $Main_EMAILMESSAGE
+	echo "300 Status	$statusAD300" >> $Main_EMAILMESSAGE
+	echo "400 Status	$statusAD400" >> $Main_EMAILMESSAGE
+	echo "500 Status	$statusAD500" >> $Main_EMAILMESSAGE
+	echo "Total Google Adwords	$statusADTotal" >> $Main_EMAILMESSAGE
+	echo "" >> $Main_EMAILMESSAGE
+	echo "Starting mysql"
+	/home/WATERFRONTMEDIA/kgrefski/scripts/seo-googleadbot-mysql $statusdate $myproduct $web $statusAD200 $statusAD300 $statusAD400 $statusAD500 $statusADTotal
+	cat ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep -i adsbot-google >${wtereport}${web}/${web}"GoogleAdbot"${logname}.${lognamesuffix}
+done
+
+for web in ${ehservers[@]}
+do
+	mount -t cifs -o username=wf_admin,password=Password12 //usnjw${web}/eh ${ehmount}${web}
+	echo cp ${ehmount}${web}/${lognameprefix}${logname}.${lognamesuffix} ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+	cp ${ehmount}${web}/${lognameprefix}${logname}.${lognamesuffix} ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+	umount ${ehmount}${web}
+	echo "${web} Serving EverydayHealth on $logdate" >> $Main_EMAILMESSAGE
+	echo "Starting googlebot grep"
+	status200=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "20. 0 ." | grep Googlebot | wc -l`
+	status300=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "30. 0 ." | grep Googlebot | wc -l`
+	status400=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "40. 0 ." | grep Googlebot | wc -l`
+	status500=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "50. 0 ." | grep Googlebot | wc -l`
+	statusTotal=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep Googlebot | wc -l`
+	echo "200 Status        $status200" >> $Main_EMAILMESSAGE
+        echo "300 Status        $status300" >> $Main_EMAILMESSAGE
+        echo "400 Status        $status400" >> $Main_EMAILMESSAGE
+        echo "500 Status        $status500" >> $Main_EMAILMESSAGE
+        echo "Total Googlebot   $statusTotal" >> $Main_EMAILMESSAGE
+	echo "Starting mysql"
+	myproduct="EverydayHealth"
+	/home/WATERFRONTMEDIA/kgrefski/scripts/seo-googlebot-mysql $statusdate $myproduct ${web} $status200 $status300 $status400 $status500 $statusTotal
+	cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep Googlebot >${ehreport}${web}/${web}"Googlebot"${logname}.${lognamesuffix}
+
+	echo "Starting googleadbot grep"
+	statusAD200=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "20. 0 ." | grep -i adsbot-google | wc -l`
+	statusAD300=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "30. 0 ." | grep -i adsbot-google | wc -l`
+	statusAD400=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "40. 0 ." | grep -i adsbot-google | wc -l`
+	statusAD500=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "50. 0 ." | grep -i adsbot-google | wc -l`
+	statusADTotal=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep -i adsbot-google | wc -l`
+	echo "200 Status        $statusAD200" >> $Main_EMAILMESSAGE
+        echo "300 Status        $statusAD300" >> $Main_EMAILMESSAGE
+        echo "400 Status        $statusAD400" >> $Main_EMAILMESSAGE
+        echo "500 Status        $statusAD500" >> $Main_EMAILMESSAGE
+        echo "Total Google Adwords      $statusADTotal" >> $Main_EMAILMESSAGE
+	echo "Starting mysql"
+	/home/WATERFRONTMEDIA/kgrefski/scripts/seo-googleadbot-mysql $statusdate $myproduct $web $statusAD200 $statusAD300 $statusAD400 $statusAD500 $statusADTotal
+	cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep -i adsbot-google >${ehreport}${web}/${web}"GoogleAdbot"${logname}.${lognamesuffix}
+
+	echo "Starting Googlebot-News grep"
+	statusGN200=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "20. 0 ." | grep Googlebot-News | wc -l`
+        statusGN300=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "30. 0 ." | grep Googlebot-News | wc -l`
+        statusGN400=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "40. 0 ." | grep Googlebot-News | wc -l`
+        statusGN500=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "50. 0 ." | grep Googlebot-News | wc -l`
+        statusGNTotal=`cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep Googlebot-News | wc -l`
+        echo "200 Status        $statusGN200" >> $Main_EMAILMESSAGE
+        echo "300 Status        $statusGN300" >> $Main_EMAILMESSAGE
+        echo "400 Status        $statusGN400" >> $Main_EMAILMESSAGE
+        echo "500 Status        $statusGN500" >> $Main_EMAILMESSAGE
+        echo "Total Google News      $statusGNTotal" >> $Main_EMAILMESSAGE
+        echo "" >> $Main_EMAILMESSAGE
+	cat ${ehreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep Googlebot-News >${ehreport}${web}/${web}"GoogleNews"${logname}.${lognamesuffix}
+done
+
+mount -t cifs -o username=wf_admin,password=Password12 //usnjwutil01/spoten /home/WATERFRONTMEDIA/kgrefski/spotenftp
+unrar x -o- /home/WATERFRONTMEDIA/kgrefski/spotenftp/MCCDaily.rar /reports/mcc/
+mv /reports/mcc/MCCWebLogs/20/${lognameprefix}${logname}.${lognamesuffix} /reports/mcc/web120/${lognameprefix}${logname}.${lognamesuffix}
+mv /reports/mcc/MCCWebLogs/21/${lognameprefix}${logname}.${lognamesuffix} /reports/mcc/web121/${lognameprefix}${logname}.${lognamesuffix}
+umount /home/WATERFRONTMEDIA/kgrefski/spotenftp
+
+for web in ${mccservers[@]}
+do
+#        mount -t cifs -o username=wf_admin,password=Password12 //usnjw${web}/wte $wtemount${web}
+#        echo cp ${wtemount}${web}/${lognameprefix}${logname}.${lognamesuffix} ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+#        cp ${wtemount}${web}/${lognameprefix}${logname}.${lognamesuffix} ${wtereport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+#        umount $wtemount${web}
+        echo "Starting googlebot grep"
+	echo ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix}
+        echo "${web} Serving MyCalorieCounter on $logdate" >> $Main_EMAILMESSAGE
+        status200=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "20. 0 ." | grep Googlebot | wc -l`
+        status300=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "30. 0 ." | grep Googlebot | wc -l`
+        status400=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "40. 0 ." | grep Googlebot | wc -l`
+        status500=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "50. 0 ." | grep Googlebot | wc -l`
+        statusTotal=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep Googlebot | wc -l`
+        echo "200 Status        $status200" >> $Main_EMAILMESSAGE
+        echo "300 Status        $status300" >> $Main_EMAILMESSAGE
+        echo "400 Status        $status400" >> $Main_EMAILMESSAGE
+        echo "500 Status        $status500" >> $Main_EMAILMESSAGE
+        echo "Total Googlebot   $statusTotal" >> $Main_EMAILMESSAGE
+        echo "Starting mysql"
+        myproduct="MyCalorieCounter"
+        /home/WATERFRONTMEDIA/kgrefski/scripts/seo-googlebot-mysql $statusdate $myproduct $web $status200 $status300 $status400 $status500 $statusTotal
+        cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep Googlebot > ${mccreport}${web}/${web}"Googlebot"${logname}.${lognamesuffix}
+
+        echo "Starting googleadbot grep"
+        statusAD200=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "20. 0 ." | grep -i adsbot-google | wc -l`
+        statusAD300=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "30. 0 ." | grep -i adsbot-google | wc -l`
+        statusAD400=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "40. 0 ." | grep -i adsbot-google | wc -l`
+        statusAD500=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep "50. 0 ." | grep -i adsbot-google | wc -l`
+        statusADTotal=`cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep -i adsbot-google | wc -l`
+        echo "200 Status        $statusAD200" >> $Main_EMAILMESSAGE
+        echo "300 Status        $statusAD300" >> $Main_EMAILMESSAGE
+        echo "400 Status        $statusAD400" >> $Main_EMAILMESSAGE
+        echo "500 Status        $statusAD500" >> $Main_EMAILMESSAGE
+        echo "Total Google Adwords      $statusADTotal" >> $Main_EMAILMESSAGE
+        echo "" >> $Main_EMAILMESSAGE
+        echo "Starting mysql"
+        /home/WATERFRONTMEDIA/kgrefski/scripts/seo-googleadbot-mysql $statusdate $myproduct $web $statusAD200 $statusAD300 $statusAD400 $statusAD500 $statusADTotal
+        cat ${mccreport}${web}/${lognameprefix}${logname}.${lognamesuffix} | grep -i adsbot-google >${mccreport}${web}/${web}"GoogleAdbot"${logname}.${lognamesuffix}
+done
+
+tar -czvf /reports/seologs${logname}.tar.gz `find /reports/ |grep -i goog |grep ${logname}`
+mount -t cifs -o username=wf_admin,password=Password12 //usnjwutil01/spoten /home/WATERFRONTMEDIA/kgrefski/spotenftp
+rm -rf /home/WATERFRONTMEDIA/kgrefski/spotenftp/*
+cp /reports/seologs${logname}.tar.gz /home/WATERFRONTMEDIA/kgrefski/spotenftp/seologs${logname}.tar.gz
+
+#Create and FTP mysqldump
+echo "Creating and FTPing mysqldump"
+mysqldump -u root --password=base9419 seoreports > seoreports-dump-${logname}
+tar -cvzf /home/WATERFRONTMEDIA/kgrefski/spotenftp/seo-dump-${logname}.tar.gz seoreports-dump-${logname}
+rm -rf seoreports-dump-${logname}
+
+umount /home/WATERFRONTMEDIA/kgrefski/spotenftp
+
+/bin/mail -s "$Main_Subject" "$Main_EMAIL" <  $Main_EMAILMESSAGE
+/bin/mail -s "$Status_Subject" "$Status_EMAIL" <  $Status_EMAILMESSAGE
+

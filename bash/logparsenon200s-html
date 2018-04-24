@@ -1,0 +1,333 @@
+#!/bin/bash
+#The purpose of the script is to automate the retrieval of non 200 status codes
+
+#Set date and log variables
+nixlogdate=$(date --date="1 day ago" +%Y%m%d)
+winlogdate=$(date --date="1 day ago" +%y%m%d)
+logdate=$(date --date="1 day ago" +%Y-%m-%d)
+
+#To run for a log file other than the current day uncomment and enter date based on format below
+#logdate="2013-07-09"
+#winlogdate="130709"
+#nixlogdate="20130709"
+
+#Set windows log formats
+wlog1=ex$winlogdate.log
+wlog2=u_ex$winlogdate.log
+
+#Set server groups
+ehservers=( usnjwweb11 usnjwweb12 usnjwweb30 usnjwweb31 usnjwweb34 )
+wteservers=( usnjwweb08 usnjwweb15 usnjwweb38 usnjwweb39 usnjwweb42 )
+jmservers=( usnjwweb36 usnjwweb37 usnjwweb40 usnjwweb46 )
+sbdservers=( usnjwweb23 usnjwweb24 usnjwweb25 )
+mptservers=( usnjlweb16  usnjlweb17  usnjlweb18  usnjlweb19  usnjlweb25  usnjlweb26 )
+vservers=( lvcache01 lvcache02 lvcache03 lvcache04 )
+
+#Set satus codes we want to investigate
+statuscodes=( 400 403 404 410 500 501 503 )
+
+#Set email variables
+MSubject="Non 200 Status code report"
+#MEmail="kgrefski@everydayhealthinc.com"
+MEmail="kgrefski@everydayhealthinc.com,jbrooks@everydayhealthinc.com,tjones@everydayhealthinc.com,rahmed@everydayhealthinc.com,dchokkadi@everydayhealthinc.com,ashear@everydayhealthinc.com,rkim@everydayhealthinc.com,jatinmehta@everydayhealthinc.com,nlega@everydayhealthinc.com,prodops@everydayhealthinc.com,pbatra@everydayhealthinc.com,ngohel@everydayhealthinc.com,mrose@everydayhealthinc.com,bkrasucki@everydayhealthinc.com,schinnasamy@everydayhealthinc.com,jwaters@everydayhealthinc.com,akaranth@everydayhealthinc.com,mballard@everydayhealthinc.com,tlatif@everydayhealthinc.com"
+MEmailMessage="/tmp/mainmessage.txt"
+echo "" > $MEmailMessage
+echo "<html> " >> $MEmailMessage
+echo "<head>" >> $MEmailMessage
+echo "        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />" >> $MEmailMessage
+echo "        <meta http-equiv="Content-Language" content="en" />" >> $MEmailMessage
+echo "</head>" >> $MEmailMessage
+echo "<body>" >> $MEmailMessage
+echo "<p><table border=1 cellpadding=2 cellspacing=2>" >> $MEmailMessage
+
+
+#Define Varnish server parsing function
+function parseVservers {
+		echo $i
+		echo "<tr><th colspan=2>$sitename $i error codes</th></tr>"  >> $MEmailMessage
+		
+		#Enumerate Status codes	 
+		for a in ${statuscodes[@]}
+			do
+				echo $i $a
+				echo "<tr><td>$i</td><td> $a</td></tr>" >> $MEmailMessage
+				currstat=`awk '($9 ~ /'"${a}"'/)' /reports/$sitename/$i/$vlog |awk '{freq[$7]++} END {for (x in freq) {print freq[x], x }}' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+				echo "$currstat "
+				echo "$currstat " >> $MEmailMessage
+				echo 
+				echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+			done
+		echo		
+		
+		#Get frequency of all status codes
+		statcoderpt=`awk -F HTTP\/1 '{print $2}' /reports/$sitename/$i/$vlog | awk '{print $2}'|awk '{freq[$0]++} END {for (x in freq) {print freq[x], x }}' | sort -rn |sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+		echo "$i Status codes "
+		echo "<tr><th colspan=2>$sitename $i Status codes</th></tr>" >> $MEmailMessage
+		echo "$statcoderpt " 
+		echo "$statcoderpt " >> $MEmailMessage
+		echo
+                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+		#Get frequency of all status codes for googlebot
+		gstatcoderpt=`awk -F\" '($6 ~ /Googlebot/)' /reports/$sitename/$i/$vlog |awk -F HTTP\/1 '{print $2}' | awk '{print $2}'|awk '{freq[$0]++} END {for (x in freq) {print freq[x], x }}' | sort -rn |sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+		echo "$i Googlebot Status codes "
+                echo "<tr><th colspan=2>$sitename $i Googlebot Status codes</th></tr>" >> $MEmailMessage
+                echo "$gstatcoderpt "
+                echo "$gstatcoderpt " >> $MEmailMessage
+                echo
+                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+		#Get top 25 most requested
+		echo "Top 25 URLs"
+                echo "<tr><th colspan=2>$sitename $i Top 25 URLs</th></tr>" >> $MEmailMessage
+                urlstat=`awk '{freq[$7]++} END {for (x in freq) {print freq[x], x}}' /reports/$sitename/$i/$vlog | tr -d '"' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+                echo "$urlstat "
+                echo "$urlstat" >> $MEmailMessage
+                echo
+                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+		#Get top 25 referrers
+		echo "Top 25 Referrers"
+		echo "<tr><th colspan=2>$sitename $i Top 25 Referrers</th></tr>" >> $MEmailMessage
+		referrstat=`awk '{freq[$11]++} END {for (x in freq) {print freq[x], x}}' /reports/$sitename/$i/$vlog | tr -d '"' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+		echo "$referrstat "
+		echo "$referrstat" >> $MEmailMessage
+		echo
+		echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+}
+
+#Define Windows 2003 logformat parsing
+function parseWservers {
+#Enumerate status codes
+for a in ${statuscodes[@]}
+                        do
+                                echo $sitename $i $a
+                                echo "<tr><th colspan=2>$sitename $i $a error codes</th></tr>" >> $MEmailMessage
+                                currstat=`awk '($14 ~ /'"${a}"'/)' /reports/$sitename/$i/$wlog |awk '{freq[$6]++} END {for (x in freq) {print freq[x], x}}' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+                                echo "$currstat "
+                                echo "$currstat " >> $MEmailMessage
+                                echo
+                                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+                        done
+                echo
+				
+				#Get frequency of all status codes
+                                statcoderpt=`awk -F HTTP\/1 '{print $2}' /reports/$sitename/$i/$wlog | awk '{print $0}'|awk '{freq[$4]++} END {for (x in freq) {print freq[x], x }}' | sort -rn|sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+                                echo "Status codes "
+                                echo "<tr><th colspan=2>$sitename $i Status codes</th></tr>" >> $MEmailMessage
+                                echo "$statcoderpt "
+                                echo "$statcoderpt " >> $MEmailMessage
+                                echo
+                                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+				#Get frequency of all status codes for googlebot
+                                gstatcoderpt=`awk -F\" '($2 ~ /Googlebot/)' /reports/$sitename/$i/$wlog |awk -F HTTP\/1 '{print $2}' | awk '{print $4}'|awk '{freq[$0]++} END {for (x in freq) {print freq[x], x }}' | sort -rn |sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+                                echo "Googlebot Status codes "
+                                echo "<tr><th colspan=2>$sitename $i Googlebot Status codes</th></tr>" >> $MEmailMessage
+                                echo "$gstatcoderpt "
+                                echo "$gstatcoderpt " >> $MEmailMessage
+                                echo
+                                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+				
+				#Get top 25 requested pages
+				echo "Top 25 URLs"
+				echo "<tr><th colspan=2>$sitename $i Top 25 URLs</th></tr>" >> $MEmailMessage
+				urlstat=`awk '{freq[$6]++} END {for (x in freq) {print freq[x], x}}' /reports/$sitename/$i/$wlog | tr -d '"' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+				echo "$urlstat "
+				echo "$urlstat" >> $MEmailMessage
+		                echo
+				echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+				#Get top 25 referrers
+				echo "Top 25 Referrers"
+				echo "<tr><th colspan=2>$sitename $i Top 25 Referrers</th></tr>" >> $MEmailMessage
+				referrstat=`awk '{freq[$13]++} END {for (x in freq) {print freq[x], x}}' /reports/$sitename/$i/$wlog | tr -d '"' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+				echo "$referrstat "
+				echo "$referrstat" >> $MEmailMessage
+				echo
+				echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+				
+}
+
+function parseW2servers {
+#Enumerate status codes
+for a in ${statuscodes[@]}
+                        do
+                                echo $i $a
+                                echo "<tr><th colspan=2>$i $a error codes</th></tr>" >> $MEmailMessage
+                                currstat=`awk '($11 ~ /'"${a}"'/)' /reports/$sitename/$i/$wlog |awk '{freq[$5]++} END {for (x in freq) {print freq[x], x}}' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+                                echo "$currstat "
+                                echo "$currstat " >> $MEmailMessage
+                                echo
+                                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+                echo
+				
+				#Get frequency of all status codes
+                                statcoderpt2=`awk '($11)' /reports/$sitename/$i/$wlog | awk '{freq[$11]++} END {for (x in freq) {print freq[x], x }}' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+                                echo "Status codes "
+                                echo "<tr><th colspan=2>$sitename $i Status codes</th></tr>" >> $MEmailMessage
+                                echo "$statcoderpt2 "
+                                echo "$statcoderpt2 " >> $MEmailMessage
+                                echo
+                                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+				#Get frequency of all status codes for googlebot
+                                gstatcoderpt=`awk '($10 ~ /Googlebot/)' /reports/$sitename/$i/$wlog |awk '{freq[$11]++} END {for (x in freq) {print freq[x], x }}' | sort -rn | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+                                echo "Googlebot Status codes "
+                                echo "<tr><th colspan=2>$sitename $i Googlebot Status codes</th></tr>" >> $MEmailMessage
+                                echo "$gstatcoderpt "
+                                echo "$gstatcoderpt " >> $MEmailMessage
+                                echo
+                                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+                        done
+
+				#Get top requested 
+				echo "Top 25 URLs"
+                                echo "<tr><th colspan=2>$sitename $i Top 25 URLs</th></tr>" >> $MEmailMessage
+                                urlstat=`awk '{freq[$5]++} END {for (x in freq) {print freq[x], x}}' /reports/$sitename/$i/$wlog | tr -d '"' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+                                echo "$urlstat "
+                                echo "$urlstat" >> $MEmailMessage
+                                echo
+                                echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+				#Get top 25 referrers
+				echo "Top 25 Referrers"
+				echo "<tr><th colspan=2>$sitename $i Top 25 Referrers</th></tr>" >> $MEmailMessage
+				referrstat=`awk '{freq[$13]++} END {for (x in freq) {print freq[x], x}}' /reports/$sitename/$i/$wlog | tr -d '"' | sort -rn | head -25 | sed -e 's/^/<tr><td>/' | sed -e 's/ /<\/td><td>/' |sed -e 's/$/<\/td><\/tr>/'`
+				echo "$referrstat "
+				echo "$referrstat" >> $MEmailMessage
+				echo
+				echo "<tr><td colspan=2></td></tr>" >> $MEmailMessage
+
+}
+
+
+
+#Define site and set logfile for varnish for EH
+
+sitename="everydayhealth"
+echo "$sitename"
+echo "$sitename" >> $MEmailMessage
+wlog=$wlog1
+vlog=varnishncsa_$sitename.log-$nixlogdate
+
+for i in ${vservers[@]}
+	do
+		echo
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+		parseVservers
+	done
+
+for i in ${ehservers[@]} 
+	do 
+		echo $i $sitename
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+		parseWservers
+	done 
+
+sitename="eh_mobile"
+echo "$sitename"
+echo "$sitename" >> $MEmailMessage
+wlog=$wlog1
+
+for i in ${ehservers[@]}
+        do
+                echo $i $sitename
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+                echo $i $sitename  >> $MEmailMessage
+                parseWservers
+        done
+
+
+#Define site and set logfile for varnish for WTE
+
+sitename="whattoexpect"
+echo "$sitename"
+echo "$sitename" >> $MEmailMessage
+vlog=varnishncsa_$sitename.log-$nixlogdate
+for i in  ${vservers[@]}
+        do
+		echo
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+		parseVservers
+	done
+
+wlog=$wlog2
+
+for i in ${wteservers[@]}
+	do 
+		echo $i
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+		parseW2servers
+	done 
+
+#Define site and set logfile for varnish for JM 
+
+sitename="jillianmichaels"
+echo "$sitename"
+echo "$sitename" >> $MEmailMessage
+vlog=varnishncsa_$sitename.log-$nixlogdate
+wlog=$wlog2
+
+for i in ${vservers[@]}
+        do
+		echo $i
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+                parseVservers
+        done
+
+
+for i in ${jmservers[@]}
+	do 
+		echo $i
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+		parseW2servers
+	done 
+
+#Define site and set logfile for varnish for SBD
+
+sitename="southbeachdiet"
+echo "$sitename"
+echo "$sitename" >> $MEmailMessage
+vlog=varnishncsa_$sitename.log-$nixlogdate
+wlog=$wlog2
+
+for i in ${vservers[@]}
+        do
+		echo $i
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+                parseVservers
+        done
+
+for i in ${sbdservers[@]}
+	do 
+		echo $i
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+		parseW2servers
+	done 
+
+#Define site and logfile for varnish for MPT
+sitename="medpagetoday"
+echo "$sitename"
+echo "$sitename" >> $MEmailMessage
+vlog=varnishncsa_$sitename.log-$nixlogdate
+llog=access_log-$winlogdate
+
+for i in ${vservers[@]}
+        do
+		echo $i
+                parseVservers
+        done
+
+vlog=$llog
+for i in ${mptservers[@]}
+	do
+		echo $i
+		echo "<tr><td>$i</td><td>$sitename</td></tr>" >> $MEmailMessage
+		parseVservers
+	done
+
+echo "</table></body></html>" >> $MEmailMessage
+mail -s "$(echo -e "Non 200 Status code report\nContent-Type: text/html")" "$MEmail" < $MEmailMessage
+#/bin/mail -s "$MSubject \nContent-Type: text/html" "$MEmail" < $MEmailMessage

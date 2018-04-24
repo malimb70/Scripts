@@ -1,0 +1,42 @@
+#!/bin/sh
+
+#image references
+sed -I -e 's/images\.dev/images\.qa1/g' backenddetect.vcl
+sed -I -e 's/photos\.dev/photos\.qa1/g' backenddetect.vcl
+sed -I -e 's/sc\.dev./sc\.qa1\./g' backenddetect.vcl
+sed -I -e 's/sc\.dev./sc\.qa1\./g' img-recv.vcl
+sed -I -e 's/images\.dev/images\.qa1/g' img-recv.vcl
+sed -I -e 's/photos\.dev/photos\.qa1/g' img-recv.vcl
+
+#These files should not contain html so a blank dev is ok
+sed -I -e 's/\ dev/\ qa1/g' *-recv.vcl
+sed -I -e 's/\dev\\/\qa1\\/g' *-recv.vcl
+sed -I -e 's/\dev\./\qa1\./g' *-recv.vcl
+sed -I -e 's/\dev2/\qa2/g' *-recv.vcl
+sed -I -e 's/\ dev/\ qa1/g' *-fetch.vcl
+sed -I -e 's/\dev\./\qa1\./g' *-fetch.vcl
+sed -I -e 's/\dev\\/\qa1\\/g' *-fetch.vcl
+sed -I -e 's/\dev2/\qa2/g' *-fetch.vcl
+sed -I -e 's/\ dev/\ qa1/g' backenddetect.vcl
+sed -I -e 's/\dev\\/\qa1\\/g' backenddetect.vcl
+sed -I -e 's/\dev\./\qa1\./g' backenddetect.vcl
+sed -I -e 's/\dev2/\qa2/g' backenddetect.vcl
+sed -I -e 's/\ dev/\ qa1/g' redirect.vcl
+sed -I -e 's/\dev\\/\qa1\\/g' redirect.vcl
+sed -I -e 's/\dev\./\qa1\./g' redirect.vcl
+sed -I -e 's/\dev2/\qa2/g' redirect.vcl
+sed -I -e 's/\ dev/\ qa1/g' default.vcl
+sed -I -e 's/\dev\\/\qa1\\/g' default.vcl
+sed -I -e 's/\dev\./\qa1\./g' default.vcl
+sed -I -e 's/\dev2/\qa2/g' default.vcl
+
+#pages with synthetic html
+sed -I -e 's/dev\\\./qa1\\\./g' *-error.vcl
+sed -I -e 's/dev\\\./qa1\\\./g' *-no*.vcl
+
+#pages with dev present
+sed -I -e 's/dev.everyday/qa1.everyday/g' *-error.vcl
+sed -I -e 's/dev.everyday/qa1.everyday/g' *-no*.vcl
+sed -I -e 's/dev.whatto/qa1.whatto/g' *-error.vcl
+sed -I -e 's/dev.daily/qa1.daily/g' *-error.vcl
+

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+OSv=`cat /etc/redhat-release |cut -d' ' -f3`
+H=`cat /etc/sysconfig/network |grep 'HOSTNAME' |wc -l`
+if [ "$H" == 0 ]
+then
+        echo "HOSTNAME=HNAME" >> /etc/sysconfig/network
+else
+        sed -i 's/.*HOSTNAME.*/HOSTNAME=HNAME/' /etc/sysconfig/network
+fi
+hostname HNAME
+echo 'HNAME' > /proc/sys/kernel/hostname
+#yum install wget sshpass ntpdate -y
+ntpdate 172.31.22.107
+

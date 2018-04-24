@@ -1,0 +1,35 @@
+{
+    "DryRun": true, 
+    "ImageId": "AMIID", 
+    "KeyName": "KEYNAME", 
+    "SecurityGroupIds": [
+        GROUPIDS
+    ], 
+    "InstanceType": "INSTYPE", 
+    "SubnetId": "SUBNETID", 
+    "NetworkInterfaces": [
+        {
+            "NetworkInterfaceId": "",
+            "DeviceIndex": 0,
+            "SubnetId": "",
+            "Description": "",
+            "PrivateIpAddress": "",
+            "Groups": [
+                ""
+            ],
+            "DeleteOnTermination": true,
+            "PrivateIpAddresses": [
+                {
+                    "PrivateIpAddress": "",
+                    "Primary": true
+                }
+            ],
+            "SecondaryPrivateIpAddressCount": 0,
+            "AssociatePublicIpAddress": true
+        }
+    ],
+
+    "Monitoring": {
+        "Enabled": true
+    }
+}

@@ -1,0 +1,41 @@
+{
+    "DryRun": true, 
+    "ImageId": "awselwpweb-06132016", 
+    "MinCount": 0, 
+    "MaxCount": 0, 
+    "KeyName": "AWS_Wordpress", 
+    "SecurityGroupIds": [
+        "sg-61d30c06",
+        "sg-b94521c0",
+        "sg-b94521c0"
+    ], 
+    "UserData": "", 
+    "InstanceType": "sg-b94521c0", 
+    "SubnetId": "subnet-e3d08294", 
+    "DisableApiTermination": true, 
+    "InstanceInitiatedShutdownBehavior": "", 
+    "PrivateIpAddress": "", 
+    "ClientToken": "", 
+    "AdditionalInfo": "", 
+    "NetworkInterfaces": [
+        {
+            "NetworkInterfaceId": "", 
+            "DeviceIndex": 0, 
+            "SubnetId": "", 
+            "Description": "", 
+            "PrivateIpAddress": "", 
+            "Groups": [
+                ""
+            ], 
+            "DeleteOnTermination": true, 
+            "PrivateIpAddresses": [
+                {
+                    "PrivateIpAddress": "", 
+                    "Primary": true
+                }
+            ], 
+            "SecondaryPrivateIpAddressCount": 0, 
+            "AssociatePublicIpAddress": true
+        }
+    ], 
+}
