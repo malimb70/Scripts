@@ -1,0 +1,63 @@
+# THIS FILE IS MANAGED BY PUPPET
+# <%= file %>
+
+<% if hostname =~ /usnjstglabsg/ -%>
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+<% else -%>
+127.0.0.1 localhost
+<% if interfaces =~ /eth0_/ -%>
+<%= ipaddress %>  <%= hostname %>.<%= domain %> <%= hostname %>
+<% elsif interfaces =~ /bond0_/ -%>
+<%= ipaddress %> <%= hostname %>.<%= domain %> <%= hostname %>
+<% elsif interfaces =~ /^bond/ -%>
+<%= ipaddress_bond0 %>  <%= hostname %>.<%= domain %> <%= hostname %>
+<% elsif interfaces =~ /ens32/ -%>
+<%= ipaddress %>  <%= hostname %>.<%= domain %> <%= hostname %>
+<% elsif interfaces =~ /eth0/ -%>
+<%= ipaddress %>  <%= hostname %>.<%= domain %> <%= hostname %>
+<% end -%>
+<% end -%>
+
+<% if  hostname =~ /usnjstglweb10/ || hostname =~ /usnjstglweb09/ || hostname =~ /stgcf2016/ -%>
+10.133.106.38	mptdb_rw
+10.133.106.38	mptdb_ro
+173.252.141.213  api-staging.medpagetoday.com
+<% elsif  hostname =~ /^mptstglcf/ || hostname =~ /^mptstglweb/ -%>
+172.30.3.15  mptdb_rw
+172.30.3.15  mptdb_ro
+<% elsif  hostname =~ /^mptlcf/ || hostname =~ /^mptlweb/ -%>
+172.30.3.150  mptdb_rw
+172.30.3.150  mptdb_ro
+<% elsif  hostname =~ /^mptdevlcf/ || hostname =~ /^mptdevlweb/ -%>
+172.30.1.128  mptdb_rw
+172.30.1.128  mptdb_ro
+<% elsif  hostname =~ /^mptqa1lcf/ || hostname =~ /^mptqa1lweb/ -%>
+172.30.4.195	mptdb_rw
+172.30.4.195	mptdb_ro
+<% elsif  hostname =~ /^mptqa2lcf/ || hostname =~ /^mptqa2lweb/ -%>
+172.30.1.178	mptdb_rw
+172.30.1.178	mptdb_ro
+<% elsif ( hostname =~ /devmptphp/ || hostname =~ /devcf2016-1/ ) -%>
+10.133.121.85 dev.medpagetoday.com
+10.133.121.172 api-dev.medpagetoday.com
+10.133.120.40   mptdb_rw
+10.133.120.40   mptdb_ro
+10.133.121.119  usnjqa1lfm01.waterfrontmedia.net
+<% elsif ( hostname =~ /qa1mptphp/ || hostname =~ /qa1cf2016-1/ ) -%>
+10.133.120.42	mptdb_rw
+10.133.120.42	mptdb_ro
+10.133.122.154  usnjqa1lfm01.waterfrontmedia.net 
+10.133.122.169 services.qa1.waterfrontmedia.com
+10.133.122.170 services.qa1.everydayhealth.com
+10.133.122.29 qa1.medpagetoday.com
+<% end -%>
+
+
+<% if ehenv == "stage" || ehenv == "prod" || hostname =~ /^mpt/  -%>
+10.133.105.89	usnjlswalk01.waterfrontmedia.net usnjlswalk01
+<% else -%>
+10.133.125.76	usnjqa1lspace01.waterfrontmedia.net usnjqa1lspace01
+<% end -%>
+
+

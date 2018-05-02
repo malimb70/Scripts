@@ -1,0 +1,38 @@
+###################################
+#
+# This file is managed by Puppet
+#
+###################################
+
+[logging]
+ default = <%= @krb5_default %>
+ kdc = <%= @krb5_kdc %>
+ admin_server = <%= @krb5_admin_server %>
+
+[libdefaults]
+ default_realm = <%= @smb_realm.upcase %>
+ dns_lookup_realm = <%= @krb5_dns_lookup_realm %>
+ dns_lookup_kdc = <%= @krb5_dns_lookup_kdc %>
+ ticket_lifetime = <%= @krb5_ticket_lifetime %>
+# renew_lifetime = <%= @krb5_renew_lifetime %>
+ forwardable = <%= @krb5_forwardable %>
+
+[realms]
+<%= @smb_realm.upcase %> = {
+ kdc = <%= @krb5_admin_server_name %>:88
+ admin_server = <%= @krb5_admin_server_name %>:749
+ default_domain = <%= @smb_realm.downcase %> 
+ }
+
+[domain_realm]
+ .<%= @smb_realm.downcase %> = <%= @smb_realm.upcase %>
+ <%= @smb_realm.downcase %> = <%= @smb_realm.upcase %>
+
+[appdefaults]
+ pam = {
+    debug = false
+    ticket_lifetime = 36000
+    renew_lifetime  = 36000
+    forwardable     = true
+    krb4_convert    = false
+ }

@@ -1,0 +1,308 @@
+#############################################################################
+# Sample NRPE Config File
+# Written by: Ethan Galstad (nagios@nagios.org)
+#
+# Last Modified: 11-23-2007
+#
+# NOTES:
+# This is a sample configuration file for the NRPE daemon.  It needs to be
+# located on the remote host that is running the NRPE daemon, not the host
+# from which the check_nrpe client is being executed.
+#############################################################################
+
+
+# LOG FACILITY
+# The syslog facility that should be used for logging purposes.
+
+log_facility=daemon
+
+
+
+# PID FILE
+# The name of the file in which the NRPE daemon should write it's process ID
+# number.  The file is only written if the NRPE daemon is started by the root
+# user and is running in standalone mode.
+
+pid_file=/var/run/nrpe.pid
+
+
+
+# PORT NUMBER
+# Port number we should wait for connections on.
+# NOTE: This must be a non-priviledged port (i.e. > 1024).
+# NOTE: This option is ignored if NRPE is running under either inetd or xinetd
+
+server_port=5666
+
+
+
+# SERVER ADDRESS
+# Address that nrpe should bind to in case there are more than one interface
+# and you do not want nrpe to bind on all interfaces.
+# NOTE: This option is ignored if NRPE is running under either inetd or xinetd
+
+#server_address=127.0.0.1
+
+
+
+# NRPE USER
+# This determines the effective user that the NRPE daemon should run as.
+# You can either supply a username or a UID.
+#
+# NOTE: This option is ignored if NRPE is running under either inetd or xinetd
+
+nrpe_user=nagios
+
+
+
+# NRPE GROUP
+# This determines the effective group that the NRPE daemon should run as.
+# You can either supply a group name or a GID.
+#
+# NOTE: This option is ignored if NRPE is running under either inetd or xinetd
+
+nrpe_group=nagios
+
+
+
+# ALLOWED HOST ADDRESSES
+# This is an optional comma-delimited list of IP address or hostnames
+# that are allowed to talk to the NRPE daemon. Network addresses with a bit mask
+# (i.e. 192.168.1.0/24) are also supported. Hostname wildcards are not currently
+# supported.
+#
+# Note: The daemon only does rudimentary checking of the client's IP
+# address.  I would highly recommend adding entries in your /etc/hosts.allow
+# file to allow only the specified host to connect to the port
+# you are running this daemon on.
+#
+# NOTE: This option is ignored if NRPE is running under either inetd or xinetd
+
+allowed_hosts=10.133.105.12,10.133.105.101,10.133.105.13,10.133.122.27,10.133.125.199,10.133.105.19,127.0.0.1
+
+
+# COMMAND ARGUMENT PROCESSING
+# This option determines whether or not the NRPE daemon will allow clients
+# to specify arguments to commands that are executed.  This option only works
+# if the daemon was configured with the --enable-command-args configure script
+# option.
+#
+# *** ENABLING THIS OPTION IS A SECURITY RISK! ***
+# Read the SECURITY file for information on some of the security implications
+# of enabling this variable.
+#
+# Values: 0=do not allow arguments, 1=allow command arguments
+
+dont_blame_nrpe=1
+
+
+
+# BASH COMMAND SUBTITUTION
+# This option determines whether or not the NRPE daemon will allow clients
+# to specify arguments that contain bash command substitutions of the form
+# $(...).  This option only works if the daemon was configured with both
+# the --enable-command-args and --enable-bash-command-substitution configure
+# script options.
+#
+# *** ENABLING THIS OPTION IS A HIGH SECURITY RISK! ***
+# Read the SECURITY file for information on some of the security implications
+# of enabling this variable.
+#
+# Values: 0=do not allow bash command substitutions,
+#         1=allow bash command substitutions
+
+allow_bash_command_substitution=0
+
+
+
+# COMMAND PREFIX
+# This option allows you to prefix all commands with a user-defined string.
+# A space is automatically added between the specified prefix string and the
+# command line from the command definition.
+#
+# *** THIS EXAMPLE MAY POSE A POTENTIAL SECURITY RISK, SO USE WITH CAUTION! ***
+# Usage scenario:
+# Execute restricted commmands using sudo.  For this to work, you need to add
+# the nagios user to your /etc/sudoers.  An example entry for alllowing
+# execution of the plugins from might be:
+#
+# nagios          ALL=(ALL) NOPASSWD: /usr/lib64/nagios/plugins/
+#
+# This lets the nagios user run all commands in that directory (and only them)
+# without asking for a password.  If you do this, make sure you don't give
+# random users write access to that directory or its contents!
+
+# command_prefix=/usr/bin/sudo
+
+
+
+# DEBUGGING OPTION
+# This option determines whether or not debugging messages are logged to the
+# syslog facility.
+# Values: 0=debugging off, 1=debugging on
+
+debug=0
+
+
+
+# COMMAND TIMEOUT
+# This specifies the maximum number of seconds that the NRPE daemon will
+# allow plugins to finish executing before killing them off.
+
+command_timeout=60
+
+
+
+# CONNECTION TIMEOUT
+# This specifies the maximum number of seconds that the NRPE daemon will
+# wait for a connection to be established before exiting. This is sometimes
+# seen where a network problem stops the SSL being established even though
+# all network sessions are connected. This causes the nrpe daemons to
+# accumulate, eating system resources. Do not set this too low.
+
+connection_timeout=300
+
+
+
+# WEEK RANDOM SEED OPTION
+# This directive allows you to use SSL even if your system does not have
+# a /dev/random or /dev/urandom (on purpose or because the necessary patches
+# were not applied). The random number generator will be seeded from a file
+# which is either a file pointed to by the environment valiable $RANDFILE
+# or $HOME/.rnd. If neither exists, the pseudo random number generator will
+# be initialized and a warning will be issued.
+# Values: 0=only seed from /dev/[u]random, 1=also seed from weak randomness
+
+#allow_weak_random_seed=1
+
+
+
+# INCLUDE CONFIG FILE
+# This directive allows you to include definitions from an external config file.
+
+#include=<somefile.cfg>
+
+
+
+# INCLUDE CONFIG DIRECTORY
+# This directive allows you to include definitions from config files (with a
+# .cfg extension) in one or more directories (with recursion).
+
+#include_dir=<somedirectory>
+#include_dir=<someotherdirectory>
+
+
+
+# COMMAND DEFINITIONS
+# Command definitions that this daemon will run.  Definitions
+# are in the following format:
+#
+# command[<command_name>]=<command_line>
+#
+# When the daemon receives a request to return the results of <command_name>
+# it will execute the command specified by the <command_line> argument.
+#
+# Unlike Nagios, the command line cannot contain macros - it must be
+# typed exactly as it should be executed.
+#
+# Note: Any plugins that are used in the command lines must reside
+# on the machine that this daemon is running on!  The examples below
+# assume that you have plugins installed in a /usr/local/nagios/lib64exec
+# directory.  Also note that you will have to modify the definitions below
+# to match the argument format the plugins expect.  Remember, these are
+# examples only!
+
+
+# The following examples use hardcoded command arguments...
+
+command[catalina_cms]=/bin/echo -e "`/usr/bin/perl /usr/lib64/nagios/plugins/catalina_cms_connection_pool_check.pl` \n"
+
+#DUPLICATE - command[check_armailer]=/usr/lib64/nagios/plugins/check_procs -w 1:1 -c 1:1 -C ruby --ereg-argument-array="ar_mailer.*?-m 012" -u rieekan
+#DUPLICATE - command[check_armailer]=/usr/lib64/nagios/plugins/check_procs -w 1:1 -c 1:1 -C ruby --ereg-argument-array="ar_mailer.*?-m 567" -u rieekan
+#DUPLICATE - command[check_armailer]=/usr/lib64/nagios/plugins/check_procs -w 1:1 -c 1:1 -C ruby --ereg-argument-array="ar_mailer.*?-m 89" -u rieekan
+command[check_armailer]=/usr/lib6464/nagios/plugins/check_procs -w 1:1 -c 1:1 -C ruby --ereg-argument-array="ar_mailer.*?-m 34" -u rieekan
+
+
+command[check_bj]=/usr/lib64/nagios/plugins/check_procs -w 1:1 -c 1:1 -C ruby --ereg-argument-array="bj" -u rieekan
+command[check_carepages_last_email]=/usr/lib64/nagios/plugins/check_carepages_last_email.pl -c 10 -w 5
+
+command[check_disk1]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /
+command[check_disk2]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /boot
+command[check_disk3]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /dev/cciss/c0d0p3
+
+command[check_disk_backup]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /backup
+command[check_disk_boot]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /boot
+command[check_disk_db]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /db
+command[check_disk_dump]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /dump
+command[check_disk_home]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /home
+
+command[check_disk_logs]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /db/logs
+command[check_disk_opt]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /opt
+command[check_disk_root]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /
+command[check_disk_searchlog]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /mnt/searchlog
+command[check_disk_searchprod]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /mnt/searchprod
+
+command[check_disk_spool1]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /var/spool/pmta/spool1
+command[check_disk_spool2]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /var/spool/pmta/spool2
+command[check_disk_spool3]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /var/spool/pmta/spool3
+
+command[check_disk_var]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /var
+command[check_file_age]=/usr/lib64/nagios/plugins/check_file_age -w 1860 -c 3660 -f $ARG1$
+command[check_file_exists]=/usr/lib64/nagios/plugins/check_file_exists.sh $ARG1$
+
+command[check_hda1]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /dev/hda1
+command[check_hda2]=/usr/lib64/nagios/plugins/check_disk -w 10% -c 5% -p /dev/cciss/c0d1p1
+
+command[check_httpd]=/usr/lib64/nagios/plugins/check_procs -c 1:250 -C httpd
+#CHANGING NAME - command[check_httpd]=/usr/lib64/nagios/plugins/check_procs -c 1:450 -C httpd
+command[check_hightraffic_httpd]=/usr/lib64/nagios/plugins/check_procs -c 1:450 -C httpd
+
+command[check_java]=/usr/lib64/nagios/plugins/check_procs -c 1:3 -C java
+
+command[check_load]=/usr/lib64/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
+#Duplicated - command[check_load]=/usr/lib64/nagios/plugins/check_load -w 15,10,7 -c 30,25,20
+command[check_high_load]=/usr/lib64/nagios/plugins/check_load -w 20,15,10 -c 35,30,25
+
+command[check_mailer]=/usr/lib64/nagios/plugins/check_carepages_mailer_errors.pl -c 10 -w 5
+
+command[check_memcached]=/usr/lib64/nagios/plugins/check_procs -c 1:1 -C memcached
+command[check_mounted_disks]=/usr/lib64/nagios/plugins/check_mounted_disks.pl
+command[check_pmtad]=/usr/lib64/nagios/plugins/check_procs -w 1:1 -c 1:1 -C pmtad
+command[check_pmtaq]=/usr/lib64/nagios/plugins/check_pmtaq.pl -q SMTP -w 15000 -c 20000
+#mon01 does not have /usr/local/.../nagios command[check_proc_snmpd]=/usr/local/lib64exec/nagios/check_procs -C snmpd
+command[check_proc_snmpd]=/usr/lib64/nagios/plugins/check_procs -C snmpd
+command[check_ruby]=/usr/lib64/nagios/plugins/check_procs -c 1:3 -C ruby
+command[check_sphinx]=/usr/lib64/nagios/plugins/check_procs -c 1:3 -C searchd
+command[check_swap]=/usr/lib64/nagios/plugins/check_swap -w 20% -c 10%
+command[check_crond]=/usr/lib64/nagios/plugins/check_procs -C crond
+
+command[check_cpm1]=/usr/lib64/nagios/plugins/check_log -F /opt/c3po/shared/log/sungard_production.log -O /opt/c3po/shared/log/sungard_production.log.checked -q "200 dummy"
+command[check_cpm]=/usr/lib64/nagios/plugins/check_log -F /opt/c3po/shared/log/sungard_production.log -O /opt/c3po/shared/log/sungard_production.log.checked -q "Timeout"
+
+#DUPLICATE - command[check_total_procs]=/usr/lib64/nagios/plugins/check_procs -w 150 -c 200
+command[check_total_procs]=/usr/lib64/nagios/plugins/check_procs -w 150 -c 200
+command[check_users]=/usr/lib64/nagios/plugins/check_users -w 5 -c 10
+command[check_var_log_messages]=/usr/bin/sudo /usr/lib64/nagios/plugins/check_log -F /var/log/messages -O /tmp/messages -q Fatal
+command[check_varnish_total]=/usr/local/bin/varnish_stats.pl -s $ARG1$ -t
+command[check_zombie_procs]=/usr/lib64/nagios/plugins/check_procs -w 5 -c 10 -s Z
+command[nagiostats]=/usr/bin/nagiostats
+
+command[ntp_fix_drift]=/usr/lib64/nagios/plugins/ntp_fix_drift
+
+# The following examples allow user-supplied arguments and can
+# only be used if the NRPE daemon was compiled with support for
+# command arguments *AND* the dont_blame_nrpe directive in this
+# config file is set to '1'.  This poses a potential security risk, so
+# make sure you read the SECURITY file before doing this.
+
+#command[check_users]=/usr/lib64/nagios/plugins/check_users -w $ARG1$ -c $ARG2$
+#command[check_load]=/usr/lib64/nagios/plugins/check_load -w $ARG1$ -c $ARG2$
+#command[check_disk]=/usr/lib64/nagios/plugins/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$
+#command[check_procs]=/usr/lib64/nagios/plugins/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$
+
+<% if (fqdn =~ /lvcache/) %>
+# Varnish 4.0 NRPE scripts
+command[check_vstatprobe_procs]=/usr/lib64/nagios/plugins/check_procs -C vstatdprobe
+command[check_varnish40_health]=/usr/lib64/nagios/plugins/check_varnish -p "$ARG1$" -w "$ARG2$" -c "$ARG3$"
+command[check_varnish_backends]=/usr/bin/sudo /usr/local/bin/check_varnish_backends.pl -H $ARG1$
+<% end %>

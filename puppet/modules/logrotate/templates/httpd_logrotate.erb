@@ -1,0 +1,30 @@
+<% if operatingsystemmajrelease =~ /7/ %>
+
+<%= logfile_rotate %> {
+   missingok
+    notifempty
+    daily
+    dateext
+    rotate 7
+    sharedscripts
+    delaycompress
+    postrotate
+        /bin/systemctl reload httpd.service > /dev/null 2>/dev/null || true
+    endscript
+    su root root
+}
+<% else %>
+
+<%= logfile_rotate %> {
+    missingok
+    notifempty
+    daily
+    dateext
+    rotate 7
+    sharedscripts
+    delaycompress
+    postrotate
+        /sbin/service httpd reload > /dev/null 2>/dev/null || true
+    endscript
+}
+<% end %>

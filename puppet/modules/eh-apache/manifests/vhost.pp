@@ -1,0 +1,7 @@
+class eh-apache::vhost (
+
+)
+{
+
+}
+

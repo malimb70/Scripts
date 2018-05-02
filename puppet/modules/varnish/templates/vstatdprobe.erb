@@ -1,0 +1,28 @@
+#This file is pushed by Puppet Vanish Module
+# Default vcsprobe sysconfig file.
+#
+
+# Usage: vstatdprobe [-h] [-k log-key-prefix] [-p zmq_port] [-P file] [-d] [-F] [-g] host
+#     -h                           # Show help
+#     -n varnish_name              # Varnishd instance name. Defaults to hostname.
+#     -k log-key-prefix            # Prefix for matching varnishlog key definitions [vcs-key]
+#     -p zmq_port                  # Remote host port [5558]
+#     -m max_queue                 # Maximum number of queued messages [50000]
+#     -P file                      # Pid file []
+#     -d                           # Generate default URL, HOST, and ALL keys
+#     -F                           # Run in foreground
+#     -g                           # Output debug information
+#     -V                           # Output version information
+
+
+<% if (ehenv =~ /dev/) or (ehenv =~ /qa/)  -%>
+<% if ( @project = "mpt" ) -%>
+DAEMON_OPTS="-d <%= vacIP %>"
+<% elsif ( @project = "eh" ) -%>
+DAEMON_OPTS="-d <%= vacIP %>"
+<% elsif ( @project = "wte" ) -%>
+DAEMON_OPTS="-d <%= vacIP %>"
+<% end -%>
+<% elsif (ehenv =~ /prod/) or (ehenv =~ /stage/ ) -%>
+DAEMON_OPTS="-d <%= vacIP %>"
+<% end -%>

@@ -1,0 +1,90 @@
+<VirtualHost <%= ipaddress %>:80>
+  ServerAdmin webmaster@medpagetoday.com
+  DocumentRoot /var/web/medpagetoday.com/content
+  ServerName www.medpagetoday.com
+  LogFormat combined
+  ErrorDocument 404 /404page.cfm
+  LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %D" proxy
+  SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+  CustomLog "/var/weblogs/medpagetoday.com/access_log" combined env=!forwarded
+  CustomLog "/var/weblogs/medpagetoday.com/access_log" proxy env=forwarded
+  ErrorLog /var/weblogs/medpagetoday.com/error_log
+  ExpiresActive On
+  ExpiresByType image/gif "access plus 8 days"
+  ExpiresByType image/jpg "access plus 8 days"
+  ExpiresByType image/jpeg "access plus 8 days"
+  ExpiresByType image/png "access plus 8 days"
+  ExpiresByType image/vnd.microsoft.icon "access plus 1 months"
+  ExpiresByType image/x-icon "access plus 1 months"
+  ExpiresByType image/ico "access plus 1 months"
+  ExpiresByType application/x-shockwave-flash "now plus 8 days"
+  ExpiresByType application/javascript "now plus 8 days"
+  ExpiresByType application/x-javascript "now plus 8 days"
+  ExpiresByType text/javascript "now plus 8 days"
+  ExpiresByType text/css "now plus 8 days"
+
+  <Directory /var/web/medpagetoday.com/content>
+    DirectoryIndex index.cfm index.html
+    Options FollowSymLinks
+    AllowOverride All
+    Order deny,allow
+    deny from all
+    Allow from all
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript text/xml application/x-javascript
+  </Directory>
+
+  <Directory "/var/web/medpagetoday.com/content/devwerp">
+    ExpiresActive Off
+  </Directory>
+
+  <Directory "/var/web/medpagetoday.com/content/admin">
+    AuthUserFile /var/web/medpagetoday.com/security/htusers
+    AuthGroupFile /var/web/medpagetoday.com/security/htgroups
+    AuthName ByPassword
+    AuthType Basic
+    require group superuser adminarea
+    AllowOverride
+    ExpiresActive Off
+  </Directory>
+
+  <Directory "/var/web/medpagetoday.com/content/newsengin">
+    AuthUserFile /var/web/medpagetoday.com/security/htusers
+    AuthGroupFile /var/web/medpagetoday.com/security/htgroups
+    AuthName NewsEngin
+    AuthType Basic
+    require user glnewsengin
+    ExpiresActive Off
+  </Directory>
+
+  <Directory "/var/web/medpagetoday.com/content/stirling">
+    AuthUserFile /var/web/medpagetoday.com/security/htusers
+    AuthGroupFile /var/web/medpagetoday.com/security/htgroups
+    AuthName ByPassword
+    AuthType Basic
+    require group superuser
+    ExpiresActive Off
+  </Directory>
+
+  KeepAlive On
+  KeepAliveTimeout 10
+</VirtualHost>
+
+<VirtualHost <%= ipaddress %>:80>
+  ServerAdmin webmaster@medpagetoday.com
+  ServerName medpagetoday.com
+  Redirect permanent / http://www.medpagetoday.com/
+</VirtualHost>
+
+<% if ehenv == "prod" -%>
+<VirtualHost <%= ipaddress %>:443>
+     SSLEngine On
+     SSLCertificateFile /etc/ssl/certs/star.medpagetoday.com.chained
+     SSLCertificateKeyFile /etc/ssl/certs/star.medpagetoday.com.key
+     #SSLCACertificateFile /etc/ssl/certs/ca.pem
+        ServerAdmin webmaster@medpagetoday.com
+        ServerName medpagetoday.com
+     DocumentRoot /var/web/
+     ErrorLog /var/weblogs/medpagetoday.com/error_log
+     CustomLog /var/weblogs/medpagetoday.com/access_log combined
+</VirtualHost>
+<% end -%>

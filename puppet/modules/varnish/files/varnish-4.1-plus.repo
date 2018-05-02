@@ -1,0 +1,23 @@
+[varnish-4.1-plus]
+name=Varnish Cache Plus
+baseurl=https://health:ptTaX9RD4c@repo.varnish-software.com/redhat/varnish-4.1-plus/el$releasever
+enabled=1
+gpgcheck=0
+ 
+[varnishtuner]
+name=Varnish Tuner
+baseurl=https://health:ptTaX9RD4c@repo.varnish-software.com/redhat/varnishtuner/el$releasever
+enabled=1
+gpgcheck=0
+ 
+[varnish-admin-console]
+name=Varnish Administration Console
+baseurl=https://health:ptTaX9RD4c@repo.varnish-software.com/redhat/vac/el$releasever
+enabled=1
+gpgcheck=0
+ 
+[mongodb-org-3.2]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.2/x86_64/
+gpgcheck=0
+enabled=1

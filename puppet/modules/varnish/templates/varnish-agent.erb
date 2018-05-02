@@ -1,0 +1,23 @@
+#This file is pushed by Puppet Vanish Module 
+#Configuration file for Varnish Agent.
+#
+# /etc/init.d/varnish-agent expects the variable $DAEMON_OPTS to be
+# set from this shell script fragment.
+#
+# See varnish-agent(1) for an overview of valid settings.
+
+<% if (ehenv =~ /dev/) or (ehenv =~ /qa/)  -%>
+<% if ( @project = "mpt" ) -%>
+DAEMON_OPTS="-z http://<%= vacIP %>:8181/api/rest/register"
+<% elsif ( @project = "eh" ) -%>
+DAEMON_OPTS="-z http://<%= vacIP %>:8181/api/rest/register"
+<% elsif ( @project = "wte" ) -%>
+DAEMON_OPTS="-z http://<%= vacIP %>:8181/api/rest/register"
+<% elsif ( @project = "img" ) -%>
+DAEMON_OPTS="-z http://<%= vacIP %>:8181/api/rest/register"
+<% end -%>
+<% elsif (ehenv =~ /prod/) or (ehenv =~ /stage/ ) -%>
+DAEMON_OPTS="-z http://<%= vacIP %>:8181/api/rest/register"
+<% end -%>
+# an example of vac callback
+# DAEMON_OPTS="-z http://vac_server/api/rest/register"

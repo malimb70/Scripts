@@ -1,0 +1,27 @@
+#!/bin/sh
+
+#image references
+sed -I -e 's/images\.qa1\./images\./g' backenddetect.vcl
+sed -I -e 's/photos\.qa1\./photos\./g' backenddetect.vcl
+sed -I -e 's/images\.qa1\./images\./g' img-recv.vcl
+sed -I -e 's/photos\.qa1\./photos\./g' img-recv.vcl
+sed -I -e 's/sc\.qa1\./sc\./g' backenddetect.vcl
+sed -I -e 's/sc\.qa1\./sc\./g' img-recv.vcl
+
+#These files should not contain html so a blank www is ok
+sed -I -e 's/\qa1/\www/g' *-recv.vcl
+sed -I -e 's/\qa1/\www/g' *-fetch.vcl
+sed -I -e 's/\qa1/\www/g' backenddetect.vcl
+sed -I -e 's/\qa1/\www/g' redirect.vcl
+
+#pages with synthetic html
+sed -I -e 's/qa1\\\./www\\\./g' *-error.vcl
+sed -I -e 's/qa1\\\./www\\\./g' eh-noblogs.vcl
+
+#pages with www present
+sed -I -e 's/qa1\.everyday/www\.everyday/g' *-error.vcl
+sed -I -e 's/qa1\.everyday/www\.everyday/g' eh-noblogs.vcl
+sed -I -e 's/qa1\.whatto/www\.whatto/g' *-error.vcl
+sed -I -e 's/qa1\.daily/www\.daily/g' *-error.vcl
+
+

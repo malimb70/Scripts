@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+
+use Sys::Hostname;
+
+my $hostname = hostname();
+my $psarg = `uname` =~ /FreeBSD/ ? '-auxww' : '-ef';
+my $service = `uname` =~ /FreeBSD/ ? '/usr/sbin/service' : '/sbin/service';
+
+my $ntp_status = 'on';
+
+system ("$service ntpd stop");
+
+while ($ntp_status) {
+        open (STATUSH, "ps $psarg | grep ntpd | grep -v grep |") or die ("unable to open pipe to ntp status: $!\n");
+                $ntp_status = <STATUSH>;
+        close (STATUSH);
+
+
+        if ($ntp_status =~ /^\S+\s+(\d+)\s+.*/) {
+                print "Sending kill to ntpd...\n";
+                kill(9, $1); # kill the pid from ps
+        }
+}
+
+# force update - last resort
+$ntpdate_out =  `/usr/sbin/ntpdate usnjwdc01.waterfrontmedia.net`;
+
+system ("$service ntpd start");
+
+open (EMAILH, "| /usr/sbin/sendmail -t |") or die "Unable to pip to sendmail: $!\n";
+
+print EMAILH qq|To: wcinquanta\@everydayhealthinc.com
+From: nagios\@$hostname
+Subject: ntp restarted on $hostname
+
+$ntpdate_out
+
+|;
+
+close(EMAILH);
+

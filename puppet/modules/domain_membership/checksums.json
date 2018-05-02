@@ -1,0 +1,8 @@
+{
+  "LICENSE": "87e1743c99bd5428db17a557a1429917",
+  "README.md": "2a59cac52faa0b1a4268db6627642f16",
+  "manifests/init.pp": "ced85914443fbb66c905171356908246",
+  "metadata.json": "bd08dcb95ac7a92d2dc9bba5b7465630",
+  "spec/spec_helper.rb": "a55d1e6483344f8ec6963fcb2c220372",
+  "tests/init.pp": "9ed91ca699f5a844b2b1dcde6b168e07"
+}

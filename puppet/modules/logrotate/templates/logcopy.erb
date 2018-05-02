@@ -1,0 +1,70 @@
+#!/bin/bash
+#set -x
+
+usage()
+{
+cat << EOF
+usage: $0 options
+
+This script moves apache access logs to a central location for reporting
+
+OPTIONS:
+   -h      Show this message
+   -p      Product grouping
+   -s      Source server name
+   -t      Target server name
+   -v      Verbose
+EOF
+}
+
+# set default target server
+TARGET=usnjlmon01
+
+while getopts "hp:t:s:v" OPTION
+do
+     case $OPTION in
+         h)
+             usage
+             exit 1
+             ;;
+         p)
+             PRODUCT=$OPTARG
+             ;;
+         t)
+             TARGET=$OPTARG
+             ;;
+         s)
+             SOURCE=$OPTARG
+             ;;
+         v)
+             VERBOSE=1
+             ;;
+         ?)
+             usage
+             exit
+             ;;
+     esac
+done
+
+if [[ -z $PRODUCT ]] || [[ -z $SOURCE ]]
+then
+     usage
+     exit 1
+fi
+
+echo $TARGET
+echo $PRODUCT
+echo $SOURCE
+
+#Create Logname
+ydate=$(date --date="1 days ago" +%Y%m%d)
+date=$(date +%Y%m%d)
+logdate=$(date +%m-%d-%Y)
+statusdate=$(date +%Y\/%m\/%d)
+lognameprefix="ex"
+lognamesuffix="log"
+<%= logdate %>
+
+ssh logcopy@$TARGET mkdir -p /reports/$PRODUCT/$SOURCE/
+
+scp -o StrictHostKeyChecking=no <%= logfile %>-${date} logcopy@$TARGET:/reports/$PRODUCT/$SOURCE/<%= logfile_name %>-${ydate}

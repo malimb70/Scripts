@@ -1,0 +1,68 @@
+# This file is pushed from eh-rsyslog Puppet Module
+# From http://cookbook.logstash.net/recipes/rsyslog-agent/rsyslog.conf
+# From http://cookbook.logstash.net/recipes/rsyslog-agent/rsyslog.conf
+$ModLoad imfile   # Load the imfile input module
+#$ModLoad imklog   # for reading kernel log messages
+#$ModLoad imuxsock # for reading local syslog messages
+
+#Access Logs for MPT
+# Watch /usr/local/httpd-2.2.31/logs/access_log
+$InputFileName /usr/local/httpd-2.2.31/logs/access_log
+$InputFileTag apache-access:
+$InputFileStateFile state-apache-access
+$InputRunFileMonitor
+
+#Error Logs for MPT
+# Watch /usr/local/httpd-2.2.31/logs/error_log
+$InputFileName /usr/local/httpd-2.2.31/logs/error_log
+$InputFileTag apache-error:
+$InputFileStateFile state-apache-error
+$InputRunFileMonitor
+
+
+#Access Logs for MPT
+# Watch /var/log/httpd/access_log
+$InputFileName /var/log/httpd/access_log
+$InputFileTag apache-access:
+$InputFileStateFile state-apache-access
+$InputRunFileMonitor
+
+#Error Logs for MPT
+# Watch /var/log/httpd/error_log
+$InputFileName /var/log/httpd/error_log
+$InputFileTag apache-error:
+$InputFileStateFile state-apache-error
+$InputRunFileMonitor
+
+# Watch /var/log/nginx/access.log
+$InputFileName /var/log/nginx/access.log
+$InputFileTag nginx-access:
+$InputFileStateFile state-nginx-access
+$InputRunFileMonitor
+
+# Watch /var/log/nginx/error.log
+$InputFileName /var/log/nginx/error.log
+$InputFileTag nginx-error:
+$InputFileStateFile state-nginx-error
+$InputRunFileMonitor
+
+# Watch /var/log/nginx/kibana.access.log
+$InputFileName /var/log/nginx/kibana.access.log
+$InputFileTag nginx-kibana-access:
+$InputFileStateFile state-nginx-kibana-access
+$InputRunFileMonitor
+
+# Watch /var/log/nginx/kibana.error.log
+$InputFileName /var/log/nginx/kibana.error.log
+$InputFileTag nginx-kibana-error:
+$InputFileStateFile state-nginx-kibana-error
+$InputRunFileMonitor
+
+
+<% if ehenv =~ /prod|stage/ %>
+if $programname == 'apache-access' then @@10.133.104.92:5545
+if $programname == 'apache-error' then @@10.133.104.92:5546
+<% elsif ehenv =~ /dev|qa/ %>
+if $programname == 'apache-access' then @@10.133.122.171:5544
+if $programname == 'apache-error' then @@10.133.122.171:5545
+<% end %>

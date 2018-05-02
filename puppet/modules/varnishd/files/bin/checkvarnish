@@ -1,0 +1,4 @@
+#!/bin/sh
+
+/usr/local/bin/varnishstat -f client_conn,client_req,uptime,cache_hit,cache_hitpass,cache_miss,backend_conn,backend_unhealthy,s_hdrbytes,s_bodybytes,MF.s0.c_req,SMF.s0.c_fail,SMF.s0.c_bytes,SMF.s0.c_freed,SMF.s0.g_alloc,SMF.s0.g_bytes,SMF.s0.g_space,s_sess,s_req,s_pipe,s_pass,s_fetch,s_hdrbytes,s_bodybytes,shm_records,shm_writes,shm_cont,backend_req,n_gzip,n_gunzip,hcb_nolock,hcb_lock,hcb_insert,fetch_failed,fetch_head,fetch_length,backend_fail,fetch_length,fetch_chunked,fetch_eof,fetch_bad,fetch_close,SMA.s0.c_bytes,SMA.s0.c_freed,SMA.s0.g_alloc,SMA.s0.g_bytes,SMA.s0.g_space,uptime,client_drop,n_wrk,n_wrk_queued,n_wrk_drop,n_object,n_lru_nuked
+

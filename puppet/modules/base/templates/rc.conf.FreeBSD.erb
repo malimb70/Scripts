@@ -1,0 +1,87 @@
+
+# $eh_hostname = 'usnjlvcache99.waterfrontmedia.net'
+# $eh_default_route = '10.133.104.4
+# $eh_netinf_one = 'bge0'
+# $eh_netinf_two = 'bge1'
+# $eh_netmask = '10.133.104.225/24'
+
+
+hostname="<%= eh_hostname -%>"
+defaultrouter="<%= eh_default_route -%>"
+
+ifconfig_<%= eh_netinf_one -%>="up"
+ifconfig_<%= eh_netinf_two -%>="up"
+cloned_interfaces="lagg0"
+ifconfig_lagg0="laggproto failover laggport <%= eh_netinf_one -%> laggport <%= eh_netinf_two -%> <%= eh_netmask -%>"
+
+<%- if has_variable?('second_route') and second_route != '' -%>
+static_routes="internalnet2"
+route_internalnet2="-net 10.133.105.0/24 10.133.104.50"
+
+dumpdev="NO"
+# ===========================================================================
+sshd_enable="YES"
+ntpd_enable="YES"
+nrpe2_enable="YES"
+snmpd_enable="YES"
+snmpd_flags="-Lsd -Lf /dev/null -a"
+sendmail_enable="YES"
+
+atop_enable="YES"
+atop_interval="5"
+atop_keepdays="14"
+
+<%- if has_variable?('varnish_enabled') and varnish_enabled == '1' -%>
+##################################################
+varnishd_enable="YES"
+varnishd_listen="<%= ipaddress -%>:80"
+varnishd_config="/usr/local/etc/varnish/default.vcl"
+varnishd_storage="malloc,<%= varnish_malloc -%>"
+varnishd_admin=":81"
+varnishd_extras="-p thread_pool_max=4000"
+# ===========================================================================
+# Enable varnishncsa DENISE
+varnishncsa_deniseaustin_enable="YES"
+varnishncsa_deniseaustin_file=/var/log/varnish/varnishncsa_deniseaustin.log
+varnishncsa_deniseaustin_flags="-m \"RxHeader:^Host: (www.)?deniseaustin.com$\" -P /var/run/varnishncsa_deniseaustin.pid -D -a -c -w ${varnishncsa_deniseaustin_file}"
+# Enable varnishncsa DG
+varnishncsa_dailyglow_enable="YES"
+varnishncsa_dailyglow_file=/var/log/varnish/varnishncsa_dailyglow.log
+varnishncsa_dailyglow_flags="-m \"RxHeader:^Host: (www.)?dailyglow.com$\" -P /var/run/varnishncsa_dailyglow.pid -D -a -c -w ${varnishncsa_dailyglow_file}"
+# Enable varnishncsa DRWEIL
+varnishncsa_drweil_enable="YES"
+varnishncsa_drweil_file=/var/log/varnish/varnishncsa_drweil.log
+varnishncsa_drweil_flags="-m \"RxHeader:^Host: (www.)?drweilsplan.com$\" -P /var/run/varnishncsa_drweil.pid -D -a -c -w ${varnishncsa_drweil_file}"
+# Enable varnishncsa EH
+varnishncsa_everydayhealth_enable="YES"
+varnishncsa_everydayhealth_file=/var/log/varnish/varnishncsa_everydayhealth.log
+varnishncsa_everydayhealth_flags="-m \"RxHeader:^Host: (www.)?everydayhealth.com$\" -P /var/run/varnishncsa_everydayhealth.pid -D -a -c -w ${varnishncsa_everydayhealth_file}"
+# Enable varnishncsa JM
+varnishncsa_jillianmichaels_enable="YES"
+varnishncsa_jillianmichaels_file=/var/log/varnish/varnishncsa_jillianmichaels.log
+varnishncsa_jillianmichaels_flags="-m \"RxHeader:^Host: (www.)?jillianmichaels.com$\" -P /var/run/varnishncsa_jillianmichaels.pid -D -a -c -w ${varnishncsa_jillianmichaels_file}"
+# Enable varnishncsa MCC
+varnishncsa_mycaloriecounter_enable="YES"
+varnishncsa_mycaloriecounter_file=/var/log/varnish/varnishncsa_mycaloriecounter.log
+varnishncsa_mycaloriecounter_flags="-m \"RxHeader:^Host: (www.)?mycaloriecounter.com$\" -P /var/run/varnishncsa_mycaloriecounter.pid -D -a -c -w ${varnishncsa_mycaloriecounter_file}"
+# Enable varnishncsa MPT
+varnishncsa_medpagetoday_enable="YES"
+varnishncsa_medpagetoday_file=/var/log/varnish/varnishncsa_medpagetoday.log
+varnishncsa_medpagetoday_flags="-m \"RxHeader:^Host: (www.)?medpagetoday.com$\" -P /var/run/varnishncsa_medpagetoday.pid -D -a -c -w ${varnishncsa_medpagetoday_file}"
+# Enable varnishncsa SEXYFOREVER
+varnishncsa_sexyforever_enable="YES"
+varnishncsa_sexyforever_file=/var/log/varnish/varnishncsa_sexyforever.log
+varnishncsa_sexyforever_flags="-m \"RxHeader:^Host: (www.)?sexyforeverplan.com$\" -P /var/run/varnishncsa_sexyforever.pid -D -a -c -w ${varnishncsa_sexyforever_file}"
+# Enable varnishncsa SONOMADIET
+varnishncsa_sonomadiet_enable="YES"
+varnishncsa_sonomadiet_file=/var/log/varnish/varnishncsa_sonomadiet.log
+varnishncsa_sonomadiet_flags="-m \"RxHeader:^Host: (www.)?sonomadiet.com$\" -P /var/run/varnishncsa_sonomadiet.pid -D -a -c -w ${varnishncsa_sonomadiet_file}"
+# Enable varnishncsa SOUTHBEACHDIET
+varnishncsa_southbeachdiet_enable="YES"
+varnishncsa_southbeachdiet_file=/var/log/varnish/varnishncsa_southbeachdiet.log
+varnishncsa_southbeachdiet_flags="-m \"RxHeader:^Host: (www.)?southbeachdiet.com$\" -P /var/run/varnishncsa_southbeachdiet.pid -D -a -c -w ${varnishncsa_southbeachdiet_file}"
+# Enable varnishncsa WTE
+varnishncsa_whattoexpect_enable="YES"
+varnishncsa_whattoexpect_file=/var/log/varnish/varnishncsa_whattoexpect.log
+varnishncsa_whattoexpect_flags="-m \"RxHeader:^Host: (www.)?whattoexpect.com$\" -P /var/run/varnishncsa_whattoexpect.pid -D -a -c -w ${varnishncsa_whattoexpect_file}"
+<%- end -%>

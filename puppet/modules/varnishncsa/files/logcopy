@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Create Logname
+#date=$(date -v-1d +%Y%m%d)
+ydate=$(date --date="1 days ago" +%Y%m%d)
+date=$(date  +%Y%m%d)
+hostn=`hostname -s |awk -F'nj' '{print $2}'`
+for i in `ls -1 /etc/init.d/varnishncsa_*`; do
+    site=${i#/etc/init.d/}
+	ssh -o StrictHostKeyChecking=no logcopy@usnjlmon01 "mkdir -p /reports/${site#varnishncsa_}/${hostn}"
+    scp -o StrictHostKeyChecking=no /var/log/varnish/${site}.log-${date} logcopy@usnjlmon01:/reports/${site#varnishncsa_}/${hostn}/${site}.log-${ydate}
+    ssh -o StrictHostKeyChecking=no logcopy@usnjlmon01 "chmod o+r /reports/${site#varnishncsa_}/${hostn}/${site}.log-${ydate}"
+done

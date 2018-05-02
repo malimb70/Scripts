@@ -1,0 +1,8 @@
+<% if ehenv =~ /prod|stage/ %>
+server 10.133.105.37 iburst maxpoll 9
+server 10.133.105.38 iburst maxpoll 9
+<% elsif ehenv =~ /dev|qa/ %>
+server 10.133.125.11 iburst maxpoll 9
+<% else %>
+server 10.133.125.11 iburst maxpoll 9
+<% end %>

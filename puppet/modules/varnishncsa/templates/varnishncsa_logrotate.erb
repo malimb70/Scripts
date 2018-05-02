@@ -1,0 +1,13 @@
+/var/log/varnish/varnishncsa_<%= @servicename %>.log {
+    missingok
+    notifempty
+    daily
+    dateext
+    rotate 7
+    nocompress
+    sharedscripts
+    delaycompress
+    postrotate
+        /sbin/service varnishncsa_<%= @servicename %> restart 2> /dev/null || true
+    endscript
+}

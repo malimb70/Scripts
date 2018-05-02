@@ -1,0 +1,40 @@
+###################################
+#
+# This file is managed by Puppet
+#
+###################################
+
+[global]
+  workgroup                      = <%= @smb_workgroup.upcase %>
+  server string			 = <%= @smb_server_string_ver %> 
+  netbios name			 = <%= @smb_netbios_name %>
+  security                       = <%= @smb_security %>
+  passdb backend		 = <%= @smb_passdb_backend %> 
+  realm                          = <%= @smb_realm.upcase %>
+  encrypt passwords              = <%= @smb_encrypt_passwords %>
+  idmap config *:backend         = <%= @smb_idmap_config_default_backend %>
+  idmap config *:range           = <%= @smb_idmap_config_default_range_start %>-<%= @smb_idmap_config_default_range_end %>
+  idmap config *:base_rid        = <%= @smb_idmap_config_default_base_rid %>
+  winbind separator              = <%= @smb_winbind_separator %>
+  winbind enum users             = <%= @smb_winbind_enum_users %>
+  winbind enum groups            = <%= @smb_winbind_enum_groups %>
+  template homedir               = <%= @smb_template_homedir %>
+  template shell                 = <%= @smb_template_shell %>
+  winbind use default domain     = <%= @smb_winbind_use_default_domain %>
+  load printers			 = <%= @smb_winbind_load_printers %>
+  cups options			 = <%= @smb_winbind_cups_options %>
+
+[home]
+
+  comment    = Home Directories
+  browseable = no
+  writable   = yes
+
+[printers]
+ 
+  comment    = All Printers
+  path	     = /var/spool/samba
+  browseable = no
+  guest ok   = no
+  writable   = no
+  printable  = yes 

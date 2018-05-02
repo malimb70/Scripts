@@ -1,0 +1,9 @@
+rocommunity wfm45MIB
+
+disk /
+disk /boot
+proc httpd
+interface bond0 6 1000000000
+trap2sink snmp_server 
+view systemview included .1
+trapsink usnjwutil03.waterfrontmedia.net

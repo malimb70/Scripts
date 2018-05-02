@@ -1,0 +1,17 @@
+<VirtualHost <%= ipaddress %>:8050>
+  ServerAdmin webmaster@medpagetoday.com
+  DocumentRoot /var/web/
+  ServerName admin.medpagetoday.com
+  LogFormat combined
+  ErrorLog /var/weblogs/medpagetoday.com/admin_error.log
+  CustomLog /var/weblogs/medpagetoday.com/admin_access.log combined
+
+  <Directory /var/web/CFIDE/ >
+    DirectoryIndex index.cfm index.html
+    Options -Indexes +FollowSymLinks
+    AllowOverride AuthConfig FileInfo
+    Order deny,allow
+    deny from all
+    Allow from all
+  </Directory>
+</VirtualHost>

@@ -1,0 +1,12 @@
+#!/usr/local/bin/bash
+
+#Create Logname
+date=$(date -v-1d +%Y%m%d)
+
+for i in `ls -1 /usr/local/etc/rc.d/varnishncsa_*`; do
+        site=${i#/usr/local/etc/rc.d/}
+        # walt - adding mkdir to autocreate - -p will recursively add and not complain if it exists
+        ssh logcopy@usnjlmon01 "mkdir -p /reports/${site#varnishncsa_}/lvcache05/"
+        scp /var/log/varnish/${site}.log-${date} logcopy@usnjlmon01:/reports/${site#varnishncsa_}/lvcache05/
+        ssh logcopy@usnjlmon01 "chmod o+r /reports/${site#varnishncsa_}/lvcache05/${site}.log-${date}"
+done

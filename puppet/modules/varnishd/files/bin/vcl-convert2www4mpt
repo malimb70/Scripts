@@ -1,0 +1,2 @@
+#Change staging to www (medpage only)
+sed -I -e 's/staging.medpagetoday.com/www.medpagetoday.com/g' backenddetect.vcl
